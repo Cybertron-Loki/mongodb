@@ -241,7 +241,7 @@ public class shopServiceTest {
                 .setName("halo")
                 .setLocation("HONGKONG")
                 .setCategoryId(12)
-                .setBrandId(12L);
+                .setBrandId(Arrays.asList(13L));
 //                .setCreatetime(new LocalDateTime().setCreateTime(12,11,111));
         Shop shopInsert = mongoTemplate.insert(shop, collectionName);
         System.out.println(shopInsert);
@@ -254,9 +254,9 @@ public class shopServiceTest {
                     .setName("ff")
                     .setId(11L)
                     .setLocation("HONGKONG")
-                    .setBrandId(12L);
+                    .setBrandId(Arrays.asList(13L));
             Shop shop2=new Shop()
-                    .setBrandId(13L)
+                    .setBrandId(Arrays.asList(13L))
                     .setLocation("HONGKONG")
                     .setName("tt")
                     .setId(14L);
@@ -274,7 +274,7 @@ public class shopServiceTest {
     public Object update(){
         String insertCollectionName="shop";
         Shop shop1=new Shop()
-                .setBrandId(12L)
+                .setBrandId(Arrays.asList(13L))
                 .setCategoryId(15)
                 .setId(14L)
                 .setLocation("HONGKONG");
@@ -622,7 +622,7 @@ public class shopServiceTest {
       Criteria criteria = Criteria.where("categoryId").is(12);
       Query query = Query.query(criteria);
       Update update = Update.update("categoryId", 12).set("brandId", 12);
-        UpdateResult updateResult = mongoTemplate.updateMulti(query, update, shop.class, collectionName);
+        UpdateResult updateResult = mongoTemplate.updateMulti(query, update, Shop.class, collectionName);
         System.out.println(updateResult.getMatchedCount() + updateResult.getModifiedCount());
         return updateResult;
   }
