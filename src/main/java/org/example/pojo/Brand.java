@@ -3,15 +3,16 @@ package org.example.pojo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.io.File;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class brand {
+public class Brand {
         private static final long serialVersionUID = 1L;
         /**
          * 商家id
@@ -30,11 +31,15 @@ public class brand {
          */
         private LocalDateTime updatetime;
         /**
-         * 商家名/品牌位置
+         * 品牌位置(headquarter)
          */
         private String location;
         @Field("images")
-        private String images;
+        private List<File> images;
 
         private int categoryId;
+        /**
+         * brand描述
+         */
+        private String description;
 }

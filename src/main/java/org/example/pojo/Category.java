@@ -1,6 +1,5 @@
 package org.example.pojo;
 
-import jdk.jfr.DataAmount;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class category {
+public class Category {
     private int id; //范畴id
     private String name; //范畴名字
     private String description;//范畴说明

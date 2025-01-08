@@ -1,15 +1,18 @@
 package org.example.service;
-
-
+import com.mongodb.client.ListIndexesIterable;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import jakarta.annotation.Resource;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.example.pojo.shop;
+import org.example.pojo.Shop;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.CollectionOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.CriteriaDefinition;
 import org.springframework.data.mongodb.core.query.Query;
@@ -17,8 +20,6 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.core.validation.Validator;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -235,36 +236,36 @@ public class shopServiceTest {
     //todo:文档增删改查
     public Object documentInsert() {
         String collectionName = "shop";
-        shop shop = new shop()
+        Shop shop = new Shop()
                 .setId(10L)
                 .setName("halo")
                 .setLocation("HONGKONG")
                 .setCategoryId(12)
                 .setBrandId(12L);
 //                .setCreatetime(new LocalDateTime().setCreateTime(12,11,111));
-        shop shopInsert = mongoTemplate.insert(shop, collectionName);
+        Shop shopInsert = mongoTemplate.insert(shop, collectionName);
         System.out.println(shopInsert);
         return shopInsert;
     }
         //批插入
         public Object insertShops(){
             String insertCollectionName="shop";
-            shop shop1=new shop()
+            Shop shop1=new Shop()
                     .setName("ff")
                     .setId(11L)
                     .setLocation("HONGKONG")
                     .setBrandId(12L);
-            shop shop2=new shop()
+            Shop shop2=new Shop()
                     .setBrandId(13L)
                     .setLocation("HONGKONG")
                     .setName("tt")
                     .setId(14L);
 
-            List<shop> shopList=new ArrayList<shop>();
+            List<Shop> shopList=new ArrayList<Shop>();
             shopList.add(shop1);
             shopList.add(shop2);
-            Collection<shop> addShops = mongoTemplate.insert(shopList, insertCollectionName);
-           for(shop shop3: addShops){
+            Collection<Shop> addShops = mongoTemplate.insert(shopList, insertCollectionName);
+           for(Shop shop3: addShops){
                System.out.println(shop3);
            }
            return addShops;
@@ -272,20 +273,20 @@ public class shopServiceTest {
     //文档更新
     public Object update(){
         String insertCollectionName="shop";
-        shop shop1=new shop()
+        Shop shop1=new Shop()
                 .setBrandId(12L)
                 .setCategoryId(15)
                 .setId(14L)
                 .setLocation("HONGKONG");
-        shop save = mongoTemplate.save(shop1, insertCollectionName);
+        Shop save = mongoTemplate.save(shop1, insertCollectionName);
         //如果存在就更新,存储数据
         System.out.println(save);
         return save;
     }
     //查询：all
     public Object checkAll(){
-        List<shop> all = mongoTemplate.findAll(shop.class, collectionName);
-        for(shop shop: all){
+        List<Shop> all = mongoTemplate.findAll(Shop.class, collectionName);
+        for(Shop shop: all){
             System.out.println(shop);
         }
          return all;
@@ -294,7 +295,7 @@ public class shopServiceTest {
     //query:By Id
     public Object checkById(){
         Long id= 12L;
-        shop byId = mongoTemplate.findById(id, shop.class, collectionName);
+        Shop byId = mongoTemplate.findById(id, Shop.class, collectionName);
         System.out.println(byId);
         return byId;
     }
@@ -305,7 +306,7 @@ public class shopServiceTest {
         //构造条件对象
         Query query = Query.query(criteria);
         //构造查询对象
-        shop shop = mongoTemplate.findOne(query, shop.class, collectionName);
+        Shop shop = mongoTemplate.findOne(query, Shop.class, collectionName);
         System.out.println(shop);
         return shop;
     }
@@ -364,52 +365,52 @@ public class shopServiceTest {
     public Object findByCondition(){
         Criteria criteria = Criteria.where("categoryId").is(12);
         Query query = Query.query(criteria);
-        List<shop> shops = mongoTemplate.find(query, shop.class, collectionName);
-        for (shop shop: shops) {
+        List<Shop> Shops = mongoTemplate.find(query, Shop.class, collectionName);
+        for (Shop shop: Shops) {
             System.out.println(shop);
         }
-        return shops;
+        return Shops;
     }
 
     public Object findByConditionAndSort(){
         Criteria criteria = Criteria.where("categoryId").is(12);
         Query query = Query.query(criteria).with(Sort.by("id"));
-        List<shop> shops = mongoTemplate.find(query, shop.class, collectionName);
-       for(shop shop: shops){
+        List<Shop> Shops = mongoTemplate.find(query, Shop.class, collectionName);
+       for(Shop shop: Shops){
            System.out.println(shop);
        }
-       return shops;
+       return Shops;
     }
 
 //    根据【单个条件】查询集合中的文档数据，并【按指定字段进行排序】与【限制指定数目】
     public Object findByConditionAndSortLimit(){
         Criteria criteria = Criteria.where("categoryId").is(12);
         Query query = Query.query(criteria).with(Sort.by("id")).limit(1);
-        List<shop> shops = mongoTemplate.find(query, shop.class, collectionName);
-        for(shop shop: shops){
+        List<Shop> Shops = mongoTemplate.find(query, Shop.class, collectionName);
+        for(Shop shop: Shops){
             System.out.println(shop);
         }
-        return shops;
+        return Shops;
     }
 
     public Object findByConditionAndSortSkip(){
         Criteria criteria = Criteria.where("categoryId").is(12);
         Query query = Query.query(criteria).with(Sort.by("id")).skip(1);
-        List<shop> shops = mongoTemplate.find(query, shop.class, collectionName);
-        for(shop shop: shops){
+        List<Shop> Shops = mongoTemplate.find(query, Shop.class, collectionName);
+        for(Shop shop: Shops){
             System.out.println(shop);
         }
-        return shops;
+        return Shops;
     }
 //     查询【存在指定字段名称】的文档数据
     public Object findByExistField(){
         Criteria criteria = Criteria.where("categoryId").exists(true);
         Query query = Query.query(criteria);
-        List<shop> shops = mongoTemplate.find(query, shop.class, collectionName);
-        for(shop shop: shops){
+        List<Shop> Shops = mongoTemplate.find(query, Shop.class, collectionName);
+        for(Shop shop: Shops){
             System.out.println(shop);
         }
-        return shops;
+        return Shops;
     }
 
     //关联查询多个条件，and
@@ -420,11 +421,11 @@ public class shopServiceTest {
 //        Criteria criteria12=Criteria.where("categoryId").is(12)
 //                .and("brandId").lt(12);
         Query query = Query.query(criteria);
-        List<shop> shops = mongoTemplate.find(query, shop.class, collectionName);
-        for(shop shop: shops){
+        List<Shop> Shops = mongoTemplate.find(query, Shop.class, collectionName);
+        for(Shop shop: Shops){
             System.out.println(shop);
         }
-        return shops;
+        return Shops;
     }
 //   在 Spring Data MongoDB 中，`Query` 类的构造方法和静态方法都可以用来创建查询对象，它们在功能上是等价的，但在使用上有所不同。让我们详细比较这两种方式，并探讨 `Criteria` 的相关方法。
 //
@@ -538,7 +539,7 @@ public class shopServiceTest {
       Criteria criteria = Criteria.where("categoryId").is(12);
       Query query = Query.query(criteria);
       Update update1 = Update.update("brandId",12);
-      UpdateResult upsert = mongoTemplate.upsert(query, update1, shop.class, collectionName);
+      UpdateResult upsert = mongoTemplate.upsert(query, update1, Shop.class, collectionName);
       System.out.println(upsert.getMatchedCount());
       //更改第一条数据
 //      更新集合中【匹配】查询到的第一条文档数据，如果没有找到就【创建并插入一个新文档】
@@ -550,7 +551,7 @@ public class shopServiceTest {
       Query query = Query.query(criteria);
       Update update = Update.update("brandId", 12).set("categoryId", 12);
 //      ==  Update update = new Update().set("age", 33).set("name", "zhangsansan");
-      UpdateResult updateResult = mongoTemplate.updateFirst(query, update, shop.class, collectionName);
+      UpdateResult updateResult = mongoTemplate.updateFirst(query, update, Shop.class, collectionName);
       System.out.println(updateResult.getMatchedCount() + updateResult.getModifiedCount());
       return updateResult;
 //      更新集合中【匹配】查询到的【文档数据集合】中的【第一条数据】
@@ -633,7 +634,7 @@ public class shopServiceTest {
   public Object remove(){
       Criteria criteria = Criteria.where("categoryId").is(12).and("brandId").is(12);
       Query query = Query.query(criteria);
-      DeleteResult deleteResult = mongoTemplate.remove(query, shop.class, collectionName);
+      DeleteResult deleteResult = mongoTemplate.remove(query, Shop.class, collectionName);
       System.out.println(deleteResult.getDeletedCount());
       return deleteResult;
   }
@@ -642,7 +643,7 @@ public class shopServiceTest {
     public Object findAndRemove(){
       Criteria criteria = Criteria.where("categoryId").is(12);
       Query query = Query.query(criteria);
-        shop result = mongoTemplate.findAndRemove(query, shop.class, collectionName);
+        Shop result = mongoTemplate.findAndRemove(query, Shop.class, collectionName);
         System.out.println(result);
         return result;
     }
@@ -650,10 +651,232 @@ public class shopServiceTest {
     public Object findAllAndRemove(){
       Criteria criteria = Criteria.where("categoryId").is(12);
       Query query = Query.query(criteria);
-        List<shop> result= mongoTemplate.findAllAndRemove(query, shop.class, collectionName);
+        List<Shop> result= mongoTemplate.findAllAndRemove(query, Shop.class, collectionName);
         System.out.println(result);
         return result;
     }
 
+    //聚合表达式
+    public Object aggregationGroupCount(){
+//        $group 进行分组，然后统计各个组的文档数量
+        GroupOperation group = Aggregation.group("categoryId").count().as("count");
+        Aggregation aggregation = Aggregation.newAggregation(group);
+        AggregationResults<Map> results = mongoTemplate.aggregate(aggregation, collectionName, Map.class);
+        for(Map map: results.getMappedResults()) {
+            System.out.println(map);
+        }
+     return results.getMappedResults();
+  }
 
+  public Object aggregationGroupMax(){
+      GroupOperation groupOperation = Aggregation.group("categoryId").max("brandId").as("maxGroupCount");
+      Aggregation aggregation = Aggregation.newAggregation(groupOperation);
+      AggregationResults<Map> results = mongoTemplate.aggregate(aggregation, collectionName, Map.class);
+      for(Map map: results.getMappedResults()) {
+          System.out.println(map);
+      }
+      return results.getMappedResults();
+  }
+    public Object aggregationGroupCountSum(){
+//      使用管道操作符 $group 进行分组，然后统计各个组文档某字段值合计  avg
+        GroupOperation groupOperation = Aggregation.group("categoryId").sum("brandId").as("maxGroupCount");
+        Aggregation aggregation = Aggregation.newAggregation(groupOperation);
+        AggregationResults<Map> results = mongoTemplate.aggregate(aggregation, collectionName, Map.class);
+        for(Map map: results.getMappedResults()) {
+            System.out.println(map);
+        }
+        return results.getMappedResults();
+    }
+
+    public Object aggregationGroupFirst(){
+//        先对数据进行排序，然后使用管道操作符 $group 进行分组，最后统计各个组文档某字段值第一个值  last
+        AggregationOperation sort = Aggregation.sort(Sort.by("shopId").descending());
+        GroupOperation group = Aggregation.group("categoryId")
+                .first("brandId").as("brandFirst")
+                .sum("brandId").as("brandTotal");
+        //统计每个范畴的第一个值与总和
+        //要是求brandid和？
+         Aggregation aggregation = Aggregation.newAggregation(group, sort);
+//         public static Aggregation newAggregation(AggregationOperation... operations) {
+//		return new Aggregation(operations);
+//	}
+        AggregationResults<Map> result = mongoTemplate.aggregate(aggregation, collectionName, Map.class);
+        for(Map map: result.getMappedResults()) {
+            System.out.println(map);
+        }
+        return result.getMappedResults();
+    }
+
+    public Object aggregationGroupPush(){
+//      使用管道操作符 $group 结合表达式操作符 $push 获取某字段列表
+        GroupOperation push = Aggregation.group("categoryId").push("brandId").as("brandList");
+        Aggregation aggregation = Aggregation.newAggregation(push);
+        AggregationResults<Map> result = mongoTemplate.aggregate(aggregation, collectionName, Map.class);
+        for(Map map: result.getMappedResults()) {
+            System.out.println(map);
+        }
+  return result.getMappedResults();}
+//聚合管道操作符:
+//
+//$project： 可以从文档中选择想要的字段，和不想要的字段（指定的字段可以是来自输入文档或新计算字段的现有字段 ，也可以通过管道表达式进行一些复杂的操作，例如数学操作，日期操作，字符串操作，逻辑操作。
+//$match： 用于过滤数据，只输出符合条件的文档。$match使用MongoDB的标准查询操作。
+//$limit： 用来限制MongoDB聚合管道返回的文档数。
+//$skip： 在聚合管道中跳过指定数量的文档，并返回余下的文档。
+//$unwind： 将文档中的某一个数组类型字段拆分成多条，每条包含数组中的一个值。
+//$group： 将集合中的文档分组，可用于统计结果。
+//$sort： 将输入文档排序后输出。
+
+    //聚合管道操作符
+    public Object aggregationGroupMatch(){
+        AggregationOperation match = Aggregation.match(Criteria.where("categoryId").is(12));
+        AggregationOperation group = Aggregation.group("location").max("shopId").as("shopMG");
+        Aggregation aggregation = Aggregation.newAggregation(match, group);
+        AggregationResults<Map> result = mongoTemplate.aggregate(aggregation, collectionName, Map.class);
+        for(Map map: result.getMappedResults()) {
+            System.out.println(map);
+        }
+    return result.getMappedResults();
+  }
+
+    /**
+     * 使用 $group 和 $limit 聚合,先使用 $group 进行分组，然后再使用 $limit 限制一定数目文档
+     *
+     * @return 聚合结果
+     */
+    public Object aggregateGroupLimit() {
+        // 设置聚合条件，先按岁数分组，然后求每组用户的工资总数、最大值、最小值、平均值，限制只能显示五条
+        AggregationOperation group = Aggregation.group("age")
+                .sum("salary").as("sumSalary")
+                .max("salary").as("maxSalary")
+                .min("salary").as("minSalary")
+                .avg("salary").as("avgSalary");
+        AggregationOperation limit = Aggregation.limit(5L);
+        // 将操作加入到聚合对象中
+        Aggregation aggregation = Aggregation.newAggregation(group, limit);
+        // 执行聚合查询
+        AggregationResults<Map> results = mongoTemplate.aggregate(aggregation, collectionName, Map.class);
+        for (Map result : results.getMappedResults()) {
+            System.out.println(result);
+        }
+        return results.getMappedResults();
+    }
+
+    /**
+     * 使用 $group 和 $skip 聚合,先使用 $group 进行分组，然后再使用 $skip 跳过一定数目文档
+     *
+     * @return 聚合结果
+     */
+    public Object aggregateGroupSkip() {
+        // 设置聚合条件，先按岁数分组，然后求每组用户的工资总数、最大值、最小值、平均值，跳过前 2 条
+        AggregationOperation group = Aggregation.group("age")
+                .sum("salary").as("sumSalary")
+                .max("salary").as("maxSalary")
+                .min("salary").as("minSalary")
+                .avg("salary").as("avgSalary");
+        AggregationOperation limit = Aggregation.skip(2L);
+        // 将操作加入到聚合对象中
+        Aggregation aggregation = Aggregation.newAggregation(group, limit);
+        // 执行聚合查询
+        AggregationResults<Map> results = mongoTemplate.aggregate(aggregation, collectionName, Map.class);
+        for (Map result : results.getMappedResults()) {
+            System.out.println(result);
+        }
+        return results.getMappedResults();
+    }
+
+    /**
+     * 使用 $group 和 $project 聚合,先使用 $group 进行分组，然后再使用 $project 限制显示的字段
+     *
+     * @return 聚合结果
+     */
+    public Object aggregateGroupProject() {
+        // 设置聚合条件,按岁数分组，然后求每组用户工资最大值、最小值，然后使用 $project 限制值显示 salaryMax 字段
+        AggregationOperation group = Aggregation.group("age")
+                .max("salary").as("maxSalary")
+                .min("salary").as("minSalary");
+        AggregationOperation project = Aggregation.project("maxSalary");
+        // 将操作加入到聚合对象中
+        Aggregation aggregation = Aggregation.newAggregation(group, project);
+        // 执行聚合查询
+        AggregationResults<Map> results = mongoTemplate.aggregate(aggregation, collectionName, Map.class);
+        for (Map result : results.getMappedResults()) {
+            System.out.println(result);
+        }
+        return results.getMappedResults();
+    }
+
+    /**
+     * 使用 $group 和 $unwind 聚合,先使用 $project 进行分组，然后再使用 $unwind 拆分文档中的数组为一条新文档记录
+     *
+     * @return 聚合结果
+     */
+    public Object aggregateProjectUnwind() {
+        // 设置聚合条件，设置显示`name`、`age`、`title`字段，然后将结果中的多条文档按 title 字段进行拆分
+        AggregationOperation project = Aggregation.project("name", "age", "title");
+        AggregationOperation unwind = Aggregation.unwind("title");
+        // 将操作加入到聚合对象中
+        Aggregation aggregation = Aggregation.newAggregation(project, unwind);
+        // 执行聚合查询
+        AggregationResults<Map> results = mongoTemplate.aggregate(aggregation, collectionName, Map.class);
+        for (Map result : results.getMappedResults()) {
+            System.out.println(result);
+        }
+        return results.getMappedResults();
+    }
+
+    //mongodb索引
+    //创建索引
+    public Object createIndex(){
+        String field1="shopId";
+        String field2="categoryId";
+        return mongoTemplate.getCollection(collectionName).createIndex(Indexes.ascending(field1,field2));
+    }
+    //创建文字索引
+    public Object createTextIndex(){
+        String field="categoryId";
+        return mongoTemplate.getCollection(collectionName).createIndex(Indexes.text(field));
+    }
+    //创建哈希索引
+    public Object createHashIndex(){
+        String field="categoryId";
+        return mongoTemplate.getCollection(collectionName).createIndex(Indexes.hashed(field));
+    }
+    //创建升序唯一索引
+    public Object createUniqueIndex(){
+        String field="categoryId";
+        IndexOptions options=new IndexOptions();
+        options.unique(true);
+        return mongoTemplate.getCollection(collectionName).createIndex(Indexes.ascending(field),options);
+    }
+   //创建局部索引
+    public Object createPartialIndex(){
+        String field="categoryId";
+        IndexOptions options=new IndexOptions();
+        options.partialFilterExpression(Filters.exists("brandId",true));
+        return mongoTemplate.getCollection(collectionName).createIndex(Indexes.ascending(field),options);
+    }
+
+
+    //查询索引
+//    获取当前【集合】对应的【所有索引】的【名称列表】
+    public Object getAllIndex(){
+        ListIndexesIterable<Document> indexLists = mongoTemplate.getCollection(collectionName).listIndexes();
+        List<Document> list=new ArrayList<>();
+        for(Document index: indexLists){
+            list.add(index);
+        }
+        return list;
+    }
+
+    //删除索引
+    public void removeIndex(){
+        String field="categoryId";
+        mongoTemplate.getCollection(collectionName).dropIndex(Indexes.ascending(field));
+//        mongoTemplate.getCollection(collectionName).dropIndex(field);
+    }
+    public void removeAllIndex(){
+        mongoTemplate.getCollection(collectionName).dropIndexes();
+    }
+
+//    单节点 mongodb 不支持事务，需要搭建 MongoDB 复制集
 }
