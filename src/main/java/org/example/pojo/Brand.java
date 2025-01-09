@@ -9,11 +9,11 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * store in mysql ,not change frequently
+ */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class Brand {
-        private static final long serialVersionUID = 1L;
         /**
          * 商家id
          */
@@ -25,11 +25,11 @@ public class Brand {
         /**
          * 创建时间
          */
-        private LocalDateTime createtime;
+        private LocalDateTime createTime;
         /**
          * 更新时间
          */
-        private LocalDateTime updatetime;
+        private LocalDateTime updateTime;
         /**
          * 品牌位置(headquarter)
          */

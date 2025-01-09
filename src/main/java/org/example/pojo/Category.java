@@ -4,9 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * store in redis ,check frequently ,
+ * use id to connect with other entity (include blog/shop/product/brand),
+ * convent to manage
+ */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class Category {
     private int id; //范畴id
     private String name; //范畴名字

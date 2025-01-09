@@ -1,20 +1,21 @@
 package org.example.pojo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
+import java.io.File;
 import java.time.LocalDateTime;
+import java.util.List;
 
+/**
+ * store in mongoDB ,complex data structure
+ */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Document("product")
-public class productInfo {
+@Document("Product")
+public class Product {
     @MongoId
     private Long    id ;//    '产品id',
     @Field("brandId")
@@ -22,8 +23,8 @@ public class productInfo {
     @Field("shopId")
     private Long   shopId ;   //'关联商家',
     @Field("images")
-    private String   images ;// '照骗',
-    private String description;//'产品评论'
+    private List<File> images ;// '照骗',
+    private String description;//'产品描述'
     private String category ;//'产品所属分类'
     @JsonFormat(pattern = "")
     private LocalDateTime createTime; //'创建时间',

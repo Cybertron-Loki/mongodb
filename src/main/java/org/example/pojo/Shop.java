@@ -10,10 +10,10 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * store in mysql
+ */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Accessors(chain = true)
 public class Shop {
     /**
      * 商家id
@@ -26,11 +26,11 @@ public class Shop {
     /**
      * 创建时间
      */
-    private LocalDateTime createtime;
+    private LocalDateTime createTime;
     /**
      * 更新时间
      */
-    private LocalDateTime updatetime;
+    private LocalDateTime updateTime;
     /**
      * 商家位置
      */
