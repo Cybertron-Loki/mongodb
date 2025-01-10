@@ -33,6 +33,7 @@ public class ShopServiceTest {
       mongoTemplate.createCollection(collectionName);
       return mongoTemplate.collectionExists(collectionName)?collectionName:"no success";
   }
+//`save` 或 `insert` 方法来执行插入操作，但这些操作都是在底层实现中调用插入功能。
 
   public Object createCollectionFixedSize(){
       String collectionName = "fixedShops";
@@ -265,6 +266,9 @@ public class ShopServiceTest {
             shopList.add(shop1);
             shopList.add(shop2);
             Collection<Shop> addShops = mongoTemplate.insert(shopList, insertCollectionName);
+            //// 插入多个文档
+            //List<YourEntity> entities = Arrays.asList(new YourEntity("2", "Bob"), new YourEntity("3", "Charlie"));
+            //mongoTemplate.insert(entities, "collectionName");
            for(Shop shop3: addShops){
                System.out.println(shop3);
            }

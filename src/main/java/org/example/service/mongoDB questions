@@ -1,0 +1,318 @@
+MongoDB:
+refer：https://www.mongodb.com/  http://www.mydlq.club/article/85/
+front：bson格式，适合存储比较复杂的数据类型且支持的查询语言类似oop。Redis相对于更适合快速读写，不适合处理复杂查询。
+Database(Collection(Document)));
+ID:可以手动，可以自动自动生成12位的ObjectID。
+index:索引存储在一个易于遍历读取的数据集合中，对数据库文档中的数据进行排序，极大提高文档查询效率，如果没有设置索引，MongoDB 会遍历集合中的整个文档，选取符合查询条件的文档记录。
+field: column aggregation: math operation
+数据类型:
+String： UTF-8 ;Integer ;Boolean ;Double ;Array;Timestamp; Object：用于内嵌文档; Null;
+Symbol： 符号。该数据类型基本上等同于字符串类型，但不同的是，它一般用于采用特殊符号类型的语言。
+Date：用 UNIX 时间格式来存储当前日期或时间。
+Object ID： 对象 ID，用于创建文档的 ID。
+Binary Data： 二进制数据，用于存储二进制数据。
+Code： 代码类型，用于在文档中存储 JavaScript 代码。
+Regular expression： 正则表达式类型，用于存储正则表达式
+Min/Max keys： 将一个值与 BSON（二进制的 JSON）元素的最低值和最高值相对比
+
+Spring Data MongoDB封装的MongoTemplate
+ <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+</dependency>
+yml配置：
+spring:
+  data:
+    mongodb:
+      host:
+        port: 27017
+        database:
+        username:
+        password:
+实体类：
+@Field:如果该数据可能不存在，要写上
+@MongoID:标注该documnet的ID
+@Document("product")标注该document的名字，一般是不需要标的，为了统一可以标
+@JsonFormat( pattern ="yyyy-MM-dd", timezone ="GMT+8")：JSON 序列化和反序列化:
+如果您在将对象转换为 JSON 时以特定格式（如 yyyy-MM-dd）表示日期，或者在接收到 JSON 时希望将日期字符串转换为 Date 对象，需要使用
+默认格式: 如果不关心日期的格式，或者使用默认的日期格式，可以不添加
+后端处理: 如果所有日期处理都在后端进行，并且不需要以特定字符串格式与前端或其他服务交互，那么可以省略该注解。
+关于数据类型：Spring Data MongoDB 会自动将 Java 数据类型映射到 MongoDB 支持的数据类型。
+
+在使用 Spring Data MongoDB 的 `upsert` 方法时，您可以看到两种不同的调用方式：
+
+1. **不指定集合名称的调用**:
+   ```java
+   UpdateResult upsert = mongoTemplate.upsert(query, update1, Shop.class);
+   ```
+
+2. **指定集合名称的调用**:
+   ```java
+   UpdateResult upsert = mongoTemplate.upsert(query, update1, Shop.class, collectionName);
+   ```
+
+### 主要区别
+
+1. **集合名称的指定**:
+   - **第一种方式**: 在没有指定集合名称的情况下，Spring Data 会根据 `Shop` 类上定义的 `@Document` 注解（如果存在）来确定要操作的集合名称。如果没有 `@Document` 注解，默认会使用类名（小写）作为集合名称。
+   - **第二种方式**: 明确指定了要操作的集合名称。无论 `Shop` 类上是否有 `@Document` 注解，操作都会针对您提供的集合名称。
+
+2. **灵活性**:
+   - **第一种方式**: 适用于大多数情况，使用这种方式时，您可以依赖于类的定义来确定集合名称，简化了代码。
+   - **第二种方式**: 当您需要在运行时动态指定集合名称，或者希望操作不同于类所定义集合的名称时，使用这种方式更为灵活。
+
+### 何时使用
+
+- **使用第一种方式**:
+  - 当您有明确的实体类，并且希望根据类的定义来管理集合名称。
+  - 保持代码清晰和简洁。
+
+- **使用第二种方式**:
+  - 当您需要操作的集合名称与实体类不一致时。
+  - 当您希望在不同情况下操作不同的集合时（例如，基于用户输入或配置文件）。
+
+### 示例
+
+假设您有一个 `Shop` 类，您可以这样使用这两种方式：
+
+```java
+// 第一种方式，根据类名或 @Document 注解来确定集合名称
+UpdateResult upsert1 = mongoTemplate.upsert(query, update1, Shop.class);
+
+// 第二种方式，明确指定集合名称
+UpdateResult upsert2 = mongoTemplate.upsert(query, update1, Shop.class, "custom_shop_collection");
+```
+
+### 总结
+
+- **第一种方式**: 使用类的定义来确定集合名称，减少硬编码。
+- **第二种方式**: 明确指定集合名称，提供更大的灵活性。
+
+根据您的具体场景选择合适的方式。如果您还有其他问题或需要进一步的解释，请随时询问！
+
+
+在 MongoDB 中，确实存在 `insert` 操作，它用于将新文档插入到集合中。虽然在 MongoDB 的 Java 驱动程序和 Spring Data MongoDB 中，通常使用 `save` 或 `insert` 方法来执行插入操作，但这些操作都是在底层实现中调用插入功能。
+
+### 1. MongoDB 的 Insert 操作
+
+MongoDB 提供了多种插入文档的方法：
+
+- **`insertOne`**: 插入单个文档。
+- **`insertMany`**: 插入多个文档。
+
+#### 示例
+
+```javascript
+// 插入单个文档
+db.collectionName.insertOne({ name: "Alice", age: 30 });
+
+// 插入多个文档
+db.collectionName.insertMany([
+    { name: "Bob", age: 25 },
+    { name: "Charlie", age: 35 }
+]);
+```
+
+### 2. 使用 Spring Data MongoDB 的 Insert 操作
+
+在 Spring Data MongoDB 中，您可以使用 `MongoTemplate` 的 `insert` 方法来插入文档。
+
+#### 示例
+
+```java
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+
+// 假设您有一个实体类
+public class YourEntity {
+    private String id;
+    private String name;
+    // getters 和 setters
+}
+
+@Autowired
+private MongoTemplate mongoTemplate;
+
+// 插入单个文档
+YourEntity entity = new YourEntity();
+entity.setId("1");
+entity.setName("Alice");
+mongoTemplate.insert(entity, "collectionName");
+
+// 插入多个文档
+List<YourEntity> entities = Arrays.asList(new YourEntity("2", "Bob"), new YourEntity("3", "Charlie"));
+mongoTemplate.insert(entities, "collectionName");
+```
+
+### 3. 使用存储库接口
+
+如果您使用 Spring Data 的存储库接口（Repository），也可以通过 `save` 方法执行插入操作：
+
+```java
+public interface YourEntityRepository extends MongoRepository<YourEntity, String> {
+    // 其他方法
+}
+
+// 在服务中使用
+@Autowired
+private YourEntityRepository yourEntityRepository;
+
+YourEntity entity = new YourEntity();
+entity.setId("1");
+entity.setName("Alice");
+yourEntityRepository.save(entity); // 插入或更新
+```
+
+### 总结
+
+- **MongoDB**: 提供 `insertOne` 和 `insertMany` 方法用于插入操作。
+- **Spring Data MongoDB**: 使用 `insert` 方法或 `save` 方法来执行插入操作。
+
+如果您还有其他问题或需要更多详细信息，请随时询问！
+在使用 Spring Data MongoDB 时，是否需要显式指定集合名称（collection name）取决于您使用的方式以及类的配置。以下是一些情况和相关说明：
+
+### 1. 使用 `@Document` 注解的实体类
+
+当您使用 `@Document` 注解标记一个实体类时，Spring Data MongoDB 默认会使用类名作为集合名称。如果您希望使用不同的集合名，可以在 `@Document` 注解中指定。
+
+#### 示例
+
+```java
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "custom_collection_name")
+public class YourEntity {
+    // 字段定义
+}
+```
+
+- **需要指定集合名**: 当您希望使用与类名不同的集合名时。
+- **不需要指定集合名**: 当您希望使用类名作为集合名时。
+
+### 2. 使用 `MongoTemplate`
+
+如果您使用 `MongoTemplate` 进行操作，通常需要提供集合名称，例如在 `insert` 或 `remove` 方法中。
+
+#### 示例
+
+```java
+mongoTemplate.insert(entity, "custom_collection_name");
+```
+
+### 3. 使用存储库接口（Repository）
+
+当您使用 Spring Data 的存储库接口时，通常不需要指定集合名称。存储库会根据实体类的配置自动识别集合名称。
+
+#### 示例
+
+```java
+public interface YourEntityRepository extends MongoRepository<YourEntity, String> {
+    // 方法定义
+}
+```
+
+- 在这种情况下，Spring Data 会根据 `@Document` 注解中的定义或默认的类名来确定集合名称。
+
+### 4. 特殊情况
+
+- **动态集合名称**: 如果您需要动态地指定集合名称（例如，基于某些运行时条件），您可以在 `MongoTemplate` 中手动指定此名称。
+- **聚合操作**: 在某些情况下，进行聚合操作时也可能需要指定集合名称。
+
+### 总结
+
+- **需要指定集合名**: 使用 `MongoTemplate` 时，或者在 `@Document` 注解中需要自定义集合名时。
+- **不需要指定集合名**: 使用存储库接口，且希望使用默认的类名作为集合名时。
+
+如果您还有其他问题或需要更详细的示例，请随时询问！
+
+Repository ===MybatisPlus
+通常使用 save 或 insert 方法来执行插入操作，但这些操作都是在底层实现中调用插入功能。
+`UPSERT` 和 `INSERT` 是数据库操作中常用的术语，它们的主要区别在于如何处理已有数据。下面是这两者的详细对比：
+
+### 1. INSERT
+
+- **定义**: `INSERT` 是一种用于向数据库表中插入新记录的操作。
+- **行为**: 当您尝试插入一条记录时，如果该记录的主键或唯一约束已存在，会导致错误（例如，违反唯一性约束）。
+- **示例**:
+  ```sql
+  INSERT INTO users (id, name) VALUES (1, 'Alice');
+  ```
+
+### 2. UPSERT
+
+- **定义**: `UPSERT` 是一种合并操作，结合了 `UPDATE` 和 `INSERT` 的功能。
+- **行为**:
+  - 如果指定的记录（通常是通过主键或唯一约束）已存在，则更新该记录。
+  - 如果记录不存在，则插入新记录。
+- **示例**:
+  ```sql
+  INSERT INTO users (id, name) VALUES (1, 'Alice')
+  ON CONFLICT (id) DO UPDATE SET name = 'Alice';
+  ```
+
+### 在 MongoDB 中的使用
+
+在 MongoDB 中，`UPSERT` 操作是通过 `update` 方法与 `upsert` 选项结合使用的。具体来说：
+
+- **MongoDB 的 `update` 方法**:
+  - 可以设置 `upsert` 为 `true`，这样如果文档不存在，则会创建一个新文档；如果存在，则会更新它。
+
+#### 示例
+
+```java
+import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+
+// 创建更新对象
+Update update = new Update();
+update.set("name", "Alice");
+
+// 执行 UPSERT 操作
+mongoTemplate.upsert(Query.query(Criteria.where("id").is(1)), update, YourEntity.class);
+```
+
+### 总结
+
+- **INSERT**: 仅用于插入新记录，若记录已存在则会报错。
+- **UPSERT**: 既可以插入新记录，也可以更新已存在的记录，避免了因记录已存在而导致的错误。
+
+在 Java 中，您可以使用匿名对象来创建和设置 `LocalDateTime`，但由于 `LocalDateTime` 是不可变的，您仍然需要使用适当的方法来生成一个新的实例。可以通过创建一个匿名对象并立即调用相应的方法来实现。
+
+### 使用匿名对象示例
+
+以下是一个使用匿名对象直接创建 `LocalDateTime` 的示例：
+
+```java
+import java.time.LocalDateTime;
+
+public class Example {
+    private LocalDateTime createTime;
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public static void main(String[] args) {
+        Example example = new Example();
+
+        // 使用匿名对象设置 createTime
+        example.setCreateTime(LocalDateTime.of(1111, 11, 12, 10, 30)); // 创建 1111年11月12日 10:30 的 LocalDateTime
+
+        System.out.println(example.getCreateTime());
+    }
+}
+```
+
+### 关键点
+
+1. **不可变性**: `LocalDateTime` 依旧是不可变的，通过 `LocalDateTime.of(...)` 方法创建新的实例。
+2. **匿名对象**: 直接在方法调用中创建 `LocalDateTime` 实例，不需要额外的变量。
+
+如果您希望在某个方法中直接使用匿名对象，而不需要命名变量，这种方式是完全可以的。只需确保每次设置时都使用 `LocalDateTime.of(...)` 方法创建新的实例。
+
+如果您有其他问题或需要更多示例，请随时询问！
