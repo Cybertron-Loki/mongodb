@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class shopServiceTest {
+public class ShopServiceTest {
   @Resource
     private MongoTemplate mongoTemplate;
     final static  private String collectionName="shop";
