@@ -1,10 +1,10 @@
 MongoDB与Redis:
 
-data: 
+1.data: 
 Mongodb :bson格式,适合存储比较复杂的数据类型且支持的查询语言类似oop.也适合持久化存储,适合复杂查询：存储方式(bson嵌套数据灵活，聚合管道，索引，分布式）
 适合点赞记录、消息历史记录。从big data角度来看：更容易进行水平扩展，适合处理大规模数据。
-Redis: 内存，二进制,map 相对于更适合快速读写，高并发，数据是临时的，不适合处理复杂查询,适合处理实时的、频繁更新的数据。适合做秒杀功能,实时点赞计数、即时推送消息（订阅发布功能）、token登录，用户在线状态（设置键的过期时间，适合存储临时数据）之类的。主从机制，数据分布式存储
-`conclusion`：seckill需要用mysql（数据一致性）
+2.Redis: 内存，二进制,map 相对于更适合快速读写，高并发，数据是临时的，不适合处理复杂查询,适合处理实时的、频繁更新的数据。适合做秒杀功能,实时点赞计数、即时推送消息（订阅发布功能）、token登录，用户在线状态（设置键的过期时间，适合存储临时数据）之类的。主从机制，数据分布式存储
+3.`conclusion`：seckill需要用mysql（数据一致性）
 blog---mongodb（由于要关联其他products以及shop以及brand数据，结构复杂不相同，前端或许难写一些）；
 products---mongodb（不同的产品信息不一样，除了产品关联的shop，brand之外，额外需要存储不同的信息，ex：药品需要存储计量成分；食物需要存储成分，食材；车需要记录缸数、排量等）
 brand and shop 设计为 mysql: 如果商店信息比较复杂，且需要更强的查询和分析能力，选择 MongoDB 是合适的。但是如果商店数据简单且访问频繁，Redis 更适合。
@@ -35,10 +35,10 @@ brand and shop 设计为 mysql: 如果商店信息比较复杂，且需要更强
     },
     "features": ["Air Conditioning", "Sunroof"]
 }
-Category（include shop brand products blogs的category）---redis，mysql；
+4.Category（include shop brand products blogs的category）---redis，mysql；
 (频需要频繁快速访问且不怎么变，如果放在mongodb有数据冗余，占存储空间，与其关联的文档只需要记录id，不需要重复记录文字，可以提高系统性能）
 shop---redis mysql（不怎么变），brand---redis mysql（不怎么变）（根据shopcategory不同有不同的选择）
-两者结合：
+5.两者结合：
 Redis 存储实时数据和状态，同时使用 MongoDB 进行持久化存储和复杂查询。如果主要用于快速访问和缓存，可以使用 Redis；如果需要持久化和复杂查询，使用 MySQL。
 考虑数据库性能、可扩展性和维护性。
 mongodb缺点：
@@ -46,7 +46,7 @@ mongodb缺点：
 2. **复杂性**: 引入 MongoDB 可能会增加架构的复杂性，特别是在数据一致性和完整性方面。要考虑数据更新一致操作。
  
 
-为什么把products和brand和shop category变成一个类Category不存储在相关的products中，且存储在redis中，以productsCategory说明：
+6.为什么把products和brand和shop category变成一个类Category不存储在相关的products中，且存储在redis中，以productsCategory说明：
 ### 优势
 1. **减少查询次数**:
    - 需要频繁访问，将 `productsCategory` 嵌套在 `products` 中，可以在一次请求中获取所有相关数据，减少多次查询的需要。
@@ -73,6 +73,23 @@ mongodb缺点：
 性能考虑:在某些情况下，查询分类信息的性能可能更优，因为 Redis 和 MySQL 都能利用索引快速检索分类数据，而不需要解析嵌套文档。
 适应变化:如果将来业务需求变动，需要对分类进行大规模的调整或重构，这种分离设计会使得变更更为简单，不会影响到产品数据的结构。
 
+7.MongoDB 与Redis 支持高并发的读写操作对比：
+MongoDB ：
+多线程模型来处理并发请求，能够同时处理多个读写操作。
+全局锁->更细粒度的锁（如集合级锁和文档级锁），从而提高了并发性能。
+副本集（Replica Set），MongoDB 可以实现读写分离，将读请求分发到多个副本节点，从而提高读操作的并发能力。
+MongoDB 的分片功能可以将数据分布到多个节点上，从而分散读写压力，支持更高的并发量。
+Redis :
+单线程模型处理请求，避免了多线程的上下文切换开销，因此在某些场景下性能非常高。内存存储。
+Redis 的数据结构相对简单（如字符串、哈希、列表等），操作非常高效。
+RDB 和 AOF 两种持久化方式，虽然主要用于缓存，但也能在一定程度上保证数据的持久性。
+
+MongoDB 和 Redis 的对比：
+性能：Redis 内存。
+数据复杂度：MongoDB复杂的数据模型和查询；Redis 简单。
+持久化：MongoDB 持久化存储； Redis 虽然支持持久化，但主要用途是缓存。
+扩展性：MongoDB 的分片和副本集机制使其在扩展性上更具优势，适合大规模数据存储；
+Redis 则更适合小规模、高性能的缓存需求。
 
 
 

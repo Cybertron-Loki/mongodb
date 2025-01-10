@@ -1,0 +1,158 @@
+refer:https://www.mongodb.com/  http://www.mydlq.club/article/85/
+Spring Data MongoDB
+
+1.可以在没有Spring容器的任何其他服务的情况下使用“'standalone'”：
+可以理解为里面的底层逻辑对象是写死的（固定的实例化: 对象的创建和管理是硬编码的，意味着在代码中明确指定了如何创建这个对象。没有灵活性: 程序的灵活性和可扩展性较低。），所以可以不用IOC。
+**"Standalone"** 指的是某些功能或组件可以独立于 Spring IoC 容器运行，而不需要依赖于它。
+具体来说：
+- **独立使用**: 直接在 Java 程序中创建和使用这些组件，而不需要通过 Spring 的依赖注入。简单的应用或工具类，不需要 Spring 的复杂管理。
+- **不依赖于上下文**: 这些组件不需要 Spring 的上下文来管理它们的生命周期，它们可以在没有 Spring 容器的情况下被实例化。直接实例
+ex：
+```java
+public class UserService {
+    public void printUser() {
+        System.out.println("User information.");
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        //use IOC
+        ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+        UserService userService = context.getBean(UserService.class);
+         //standalone
+          UserService userService = new UserService();
+        userService.printUser();
+    }
+}
+
+
+使用 IoC 容器的优势在于：
+- **动态管理**: IoC 容器可以在运行时决定如何创建对象。这种方式提供了更大的灵活性，允许你在不修改代码的情况下更改对象的实现。
+- **依赖注入**: IoC 容器可以自动处理对象之间的依赖关系，使得各个组件之间的耦合度降低，便于测试和维护。
+
+
+standalone组件：
+- **不需要依赖注入**: 这些组件的实例化方式是简单的，不涉及复杂的依赖关系，或者它们的依赖关系已经在类内部处理。
+- **适用于简单场景**: 在一些简单的应用或工具类中，直接实例化对象是足够的，不需要引入 IoC 的复杂性。
+
+`conclusion`:
+"写死": 如果对象的创建逻辑是固定的，且没有复杂的依赖关系，可以选择不使用 IoC。
+灵活性与复杂性: 对于简单场景，直接实例化可能更简单有效；但在复杂应用中，使用 IoC 容器能够提高灵活性和可维护性。
+
+
+2.在使用 Spring Data MongoDB 的实体类中，`@Document` 注解用于指明该类对应的 MongoDB 集合。如果没有显式地使用 `@Document` 注解，Spring Data MongoDB 将默认使用类名（即类名小写）作为集合名。
+指定集合名称或其他配置@Document(collection = "users") // 指定集合名称为 "users"
+不写 `@Document` ：
+在简单的项目中，如果默认的集合名，简化代码，注意保持一致性。
+MongoDB 对集合名是区分大小写的，所以在使用 `@Document` 时要注意集合名称的大小写。
+
+
+3.about the project and data:
+shop product brand需要自己手动添加最基础信息，再发blog评论
+mongodb结构：Database(Collection(Document)));
+ID:可以手动，可以自动自动生成12位的ObjectID。
+Index:索引存储在一个易于遍历读取的数据集合中，对数据库文档中的数据进行排序，极大提高文档查询效率，如果没有设置索引，MongoDB 会遍历集合中的整个文档，选取符合查询条件的文档记录。
+索引举例：
+ 创建category索引
+db.products.createIndex({ category: 1 })
+ `{ category: 1 }`：这是索引的字段和排序顺序。`1` 表示升序索引，`-1` 表示降序索引。
+ 查询
+db.products.find({ category: "Electronics" })
+创建索引会占用额外的存储空间。
+在插入、更新或删除文档时，索引需要维护，这可能会导致性能下降。
+对比于Redis存储Category，考虑多方面因素。
+field: column aggregation: math operation
+
+数据类型:
+String： UTF-8 ;Integer ;Boolean ;Double ;Array;Timestamp; Object：用于内嵌文档; Null;
+Symbol： 符号。该数据类型基本上等同于字符串类型，但不同的是，它一般用于采用特殊符号类型的语言。
+Date：用 UNIX 时间格式来存储当前日期或时间。
+Object ID： 对象 ID，用于创建文档的 ID。
+Binary Data： 二进制数据，用于存储二进制数据。
+Code： 代码类型，用于在文档中存储 JavaScript 代码。
+Regular expression： 正则表达式类型，用于存储正则表达式
+Min/Max keys： 将一个值与 BSON（二进制的 JSON）元素的最低值和最高值相对比
+
+Spring Data MongoDB封装的MongoTemplate
+ <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+</dependency>
+yml配置：
+spring:
+  data:
+    mongodb:
+      host: 
+        port: 27017
+        database:
+        username:
+        password:
+对应的Java实体类：
+@Field:如果该数据可能不存在，要写上
+@MongoID:标注该documnet的ID
+@Document("product")标注该document的名字，一般是不需要标的，为了统一可以标
+@JsonFormat( pattern ="yyyy-MM-dd", timezone ="GMT+8")：JSON 序列化和反序列化:
+将对象转换为 JSON 时以特定格式（如 yyyy-MM-dd）表示日期，或者在接收到 JSON 时希望将日期字符串转换为 Date 对象，需要使用
+默认格式: 如果不关心日期的格式，或者使用默认的日期格式，可以不添加
+后端处理: 如果所有日期处理都在后端进行，并且不需要以特定字符串格式与前端或其他服务交互，那么可以省略该注解。
+关于数据类型：Spring Data MongoDB 会自动将 Java 数据类型映射到 MongoDB 支持的数据类型。
+
+3.是否需要显式指定集合名称：
+   UpdateResult upsert = mongoTemplate.upsert(query, update1, Shop.class);
+   UpdateResult upsert = mongoTemplate.upsert(query, update1, Shop.class, collectionName);
+
+1） **集合名称的指定**:
+   - **第一种方式**: 在没有指定集合名称的情况下，Spring Data 会根据 `Shop` 类上定义的 `@Document` 注解（如果存在）来确定要操作的集合名称。如果没有 `@Document` 注解，默认会使用类名（小写）作为集合名称。
+   - **第二种方式**: 明确指定了要操作的集合名称。无论 `Shop` 类上是否有 `@Document` 注解，操作都会针对您提供的集合名称。
+
+2） **优点对比**:
+   - **第一种方式**: 适用于大多数情况，使用这种方式时，依赖于类的定义来确定集合名称，简化代码。
+   - **第二种方式**: 运行时动态指定集合名称，操作不同于类所定义集合的名称时，使用这种方式更为灵活。and聚合操作。
+
+###  使用 `MongoTemplate`,通常需要提供集合名称，（不提供就要依赖类名）例如在 `insert` 或 `remove` 方法中。
+mongoTemplate.insert(entity, "custom_collection_name");
+### 使用存储库接口（Repository)，通常不需要指定集合名称。存储库会根据实体类的配置自动识别集合名称。
+public interface YourEntityRepository extends MongoRepository<YourEntity, String> {
+}
+在这种情况下，Spring Data 会根据 `@Document` 注解中的定义或默认的类名来确定集合名称。
+Repository ===MybatisPlus
+
+
+5.关于数据存储，通常使用 save 或 insert 方法来执行插入操作，但这些操作都是在底层实现中调用插入功能。
+`UPSERT` 和 `INSERT` 的主要区别在于如何处理已有数据。
+### 在 MYSQL 中的使用
+insert:插入一条记录时，如果该记录的主键或唯一约束已存在，会导致错误（例如，违反唯一性约束）。
+  INSERT INTO users (id, name) VALUES (1, 'Alice');
+upsert:如果指定的记录（通常是通过主键或唯一约束）已存在，则更新该记录。如果记录不存在，则插入新记录。避免了因记录已存在而导致的错误。
+ `UPSERT` 是一种合并操作，结合了 `UPDATE` 和 `INSERT` 的功能
+  INSERT INTO users (id, name) VALUES (1, 'Alice')
+  ON CONFLICT (id) DO UPDATE SET name = 'Alice';
+
+### 在 MongoDB 中的使用
+设置 `upsert` 为 `true`时，这样如果文档不存在，则会创建一个新文档；如果存在，则会更新。
+// 创建更新对象
+Update update = new Update();
+update.set("name", "Alice");
+// 执行 UPSERT 操作
+mongoTemplate.upsert(Query.query(Criteria.where("id").is(1)), update, YourEntity.class);
+
+6.关于LocalDateTime的set方式：
+在 Java 中，LocalDateTime 是一个不可变的对象，一旦创建，其内部状态（即表示的日期和时间）就不能被改变。
+如果要改变一个 LocalDateTime 的值，实际上是创建了一个新的 LocalDateTime 实例，而不是更新原来的实例。
+
+why不能直接设置 LocalDateTime 的值：
+多线程环境中使用时更加安全，无需担心数据的不一致性（稳定可靠）。每次对日期时间的操作都会返回一个新的实例，而不是改变原来的对象
+对于 LocalDateTime，调用工厂方法比如 LocalDateTime.of来创建一个新的对象。
+使用匿名对象：
+不需要为每个新的 LocalDateTime 实例创建额外的变量。
+public class Example {
+    private LocalDateTime createTime;
+//setter getter
+    public static void main(String[] args) {
+        Example example = new Example();
+        example.setCreateTime(LocalDateTime.of(1111, 11, 12, 10, 30)); // 创建 1111年11月12日 10:30 的 LocalDateTime
+        System.out.println(example.getCreateTime());
+    }
+}
+
