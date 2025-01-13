@@ -5,11 +5,19 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.example.MongoDBOperations.Constant.collectionName;
+
+@Component
 public class Index {
+    @Autowired
+    private MongoTemplate mongoTemplate;
     //mongodb索引
     //创建索引
     public Object createIndex(){
@@ -42,9 +50,8 @@ public class Index {
         return mongoTemplate.getCollection(collectionName).createIndex(Indexes.ascending(field),options);
     }
 
-
     //查询索引
-//    获取当前【集合】对应的【所有索引】的【名称列表】
+    //获取集合对应的所有索引的名列表
     public Object getAllIndex(){
         ListIndexesIterable<Document> indexLists = mongoTemplate.getCollection(collectionName).listIndexes();
         List<Document> list=new ArrayList<>();
@@ -64,6 +71,6 @@ public class Index {
         mongoTemplate.getCollection(collectionName).dropIndexes();
     }
 
-//    单节点 mongodb 不支持事务，需要搭建 MongoDB 复制集
+// 单节点 mongodb 不支持事务，需要搭建 MongoDB 复制集
 }
-}
+
